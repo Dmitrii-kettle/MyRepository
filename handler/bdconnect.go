@@ -1,18 +1,29 @@
 package bdconnect
 
 import (
+	"MyServer/mlog"
 	"database/sql"
 	"log"
+	"sync"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "modernc.org/sqlite"
 )
 
-var database *sql.DB
+type DBConnector struct {
+	Connector  *sql.DB
+	cacheMutex sync.Mutex
+}
 
-func DbConnect() {
-	db, err := sql.Open("mysql", "root:password@/productdb")
-	if err != nil {
-		log.Fatal(err)
+func GetNewDBConnector() (*DBConnector, error) {
+	connector, err := sql.Open("sqlite", "database.db")
+	if err = connector.Ping(); err != nil {
+		log.Panic("Failed connection to Database")
 	}
-	defer db.Close()
+	connector.SetMaxIdleConns(5)
+	mlog.Trace("Database was connected")
+
+	return &DBConnector{
+		Connector:  connector,
+		cacheMutex: sync.Mutex{},
+	}, err
 }

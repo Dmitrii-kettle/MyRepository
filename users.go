@@ -1,6 +1,6 @@
 package poj
 
-type User struct {
+type Users struct {
 	Id  int `json:"-"`
 	NSP struct {
 		Name       string `json:"name"`
